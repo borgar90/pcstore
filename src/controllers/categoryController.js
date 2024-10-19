@@ -2,7 +2,7 @@ import Category from '../models/Category.js';
 
 export const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find({}).populate('parent');
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching categories', error: error.message });

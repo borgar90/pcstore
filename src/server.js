@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 
 import { authRoutes } from './routes/auth.js';
 import { userRoutes } from './routes/users.js';
@@ -23,8 +24,23 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// MongoDB-tilkobling
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000, // Øk timeout til 30 sekunder
+    });
+    console.log('Tilkoblet MongoDB');
+  } catch (error) {
+    console.error('MongoDB tilkoblingsfeil:', error);
+    process.exit(1);
+  }
+};
+
 // Middleware
-app.use(cors());
+app.use(cors("*"));
 app.use(express.json());
 
 // Serve static files from the React build
@@ -50,11 +66,12 @@ app.use(errorHandler);
 
 const startServer = async (port) => {
   try {
+    await connectDB();  // Koble til MongoDB før serveren starter
     app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+      console.log(`Server kjører på port ${port}`);
     });
   } catch (error) {
-    console.error('Failed to start the server:', error);
+    console.error('Kunne ikke starte serveren:', error);
     process.exit(1);
   }
 };
