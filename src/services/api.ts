@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 
-const API_URL = '/api';
+const API_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -45,7 +45,18 @@ const handleApiError = (error: unknown) => {
 export const login = (credentials: { email: string; password: string }) => api.post('/auth/login', credentials);
 export const register = (userData: any) => api.post('/auth/register', userData);
 export const logout = () => api.post('/auth/logout');
-
+export const checkUserPermissions = async (userId: string, permission: string): Promise<boolean> => {
+  try {
+    const response = await api.get(`/users/${userId}/permissions`, {
+      params: { permission },
+    });
+    console.log("response", response.data.hasPermission);
+    return response.data.hasPermission;
+  } catch (error) {
+    console.error('Feil ved sjekking av brukertillatelser:', error);
+    return false;
+  }
+};
 // Products
 export const getProducts = async () => {
   try {
@@ -55,14 +66,30 @@ export const getProducts = async () => {
     handleApiError(error);
   }
 };
-export const createProduct = (productData: any) => api.post('/products', productData);
-export const updateProduct = (id: string, productData: any) => api.put(`/products/${id}`, productData);
+export const createProduct = async (productData: FormData) => {
+  const response = await api.post('/products', productData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const updateProduct = async (id: string, productData: FormData) => {
+  const response = await api.put(`/products/${id}`, productData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
 export const deleteProduct = (id: string) => api.delete(`/products/${id}`);
 
 // Categories
 export const getCategories = async () => {
   try {
     const response = await api.get('/categories');
+    console.log("response", response.data);
     return response.data;
   } catch (error) {
     handleApiError(error);

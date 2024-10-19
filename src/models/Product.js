@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   type: { type: String, enum: ['part', 'pc', 'other'], required: true },
   stock: { type: Number, default: 0 },
-  images: [{ type: String }],
+  gallery: { type: mongoose.Schema.Types.ObjectId, ref: 'Gallery' },
   specs: { type: Map, of: String },
   isFeatured: { type: Boolean, default: false },
   isMainFeatured: { type: Boolean, default: false },
